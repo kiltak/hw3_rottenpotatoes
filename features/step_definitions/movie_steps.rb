@@ -20,7 +20,34 @@ end
 #  "When I check the following ratings: G"
 
 When /I (un)?check the following ratings: (.*)/ do |uncheck, rating_list|
-  # HINT: use String#split to split up the rating_list, then
-  #   iterate over the ratings and reuse the "When I check..." or
-  #   "When I uncheck..." steps in lines 89-95 of web_steps.rb
+  rating_list.split.each do |rating|
+    if uncheck
+      step "I uncheck \"ratings_#{rating}\""
+    else
+      step "I check \"ratings_#{rating}\""
+    end
+  end
+end
+
+# Use a list of movies to see (or not).
+
+Then /I should (not )?see the following movies: (.*)/ do |visible, movie_list|
+  movie_list.split("\" \"").each do |movie|
+    movie.delete!("\"")
+    step "I should #{visible}see \"#{movie}\""
+  end
+end
+
+# Check for all of the movies
+
+Then /I should see (all|none) of the movies/ do |quantity|
+  if quantity == "all"
+    movie_count = 10
+  elsif quantity == "none"
+    movie_count = 0
+  end
+  
+  row_count = movie_count + 1  # the title row
+  
+  page.all('table#movies tr').count.should == row_count
 end
